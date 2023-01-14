@@ -1,8 +1,13 @@
 package cli
 
+import (
+	"os"
+)
+
 // App stores information about the application's state.
 type App struct {
 	ExitValue     int
+	Trap          chan os.Signal
 	HelpWanted    bool
 	VersionWanted bool
 	Port          string

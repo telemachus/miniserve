@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"syscall"
 	"time"
 
 	kitlog "github.com/go-kit/log"
@@ -15,14 +17,14 @@ const (
 	shutdownTimeout     = 5
 )
 
-func (app *App) NewServer(l kitlog.Logger) *http.Server {
+func (app *App) NewServer(logger kitlog.Logger) *http.Server {
 	if app.NoOp() {
 		return nil
 	}
 
 	addr := fmt.Sprintf(":%s", app.Port)
-	fs := http.FileServer(wrappedDir{http.Dir(app.Dir)})
-	middleware := loggingMiddleware(l)
+	fs := http.FileServer(WrappedDir{http.Dir(app.Dir)})
+	middleware := loggingMiddleware(logger)
 	fsWithLogging := middleware(fs)
 
 	return &http.Server{
@@ -32,49 +34,57 @@ func (app *App) NewServer(l kitlog.Logger) *http.Server {
 	}
 }
 
-func (app *App) StartAndShutdown(s *http.Server, l kitlog.Logger) {
+func (app *App) StartAndShutdown(server *http.Server, logger kitlog.Logger) {
 	if app.NoOp() {
 		return
 	}
 
-	go app.start(s, l)
+	app.TrapSignals(os.Interrupt, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+	defer app.CloseTrap()
 
-	stopCh, closeCh := newChannel()
-	defer closeCh()
-	l.Log("level", "info", "msg", <-stopCh)
+	go app.start(server, logger)
 
-	app.shutdown(context.Background(), s, l)
-}
-
-func (app *App) start(s *http.Server, l kitlog.Logger) {
-	if app.NoOp() {
-		return
-	}
-
-	l.Log(
+	logger.Log(
 		"level", "info",
-		"msg", "starting miniserve",
-		"addr", s.Addr,
+		"msg", <-app.Trap,
 	)
 
-	if err := s.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		l.Log(
+	app.shutdown(context.Background(), server, logger)
+}
+
+func (app *App) start(server *http.Server, logger kitlog.Logger) {
+	if app.NoOp() {
+		return
+	}
+
+	logger.Log(
+		"level", "info",
+		"msg", fmt.Sprintf("starting %s", appName),
+		"addr", server.Addr,
+	)
+
+	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		logger.Log(
 			"level", "error",
 			"msg", err,
 		)
 
 		app.ExitValue = exitFailure
 
+		// Don't hang the terminal if the server never starts.
+		// Alternatively, I could simply call panic(err) here.
+		app.Trap <- syscall.SIGINT
+
 		return
 	}
 
-	l.Log(
+	logger.Log(
 		"level", "info",
-		"msg", "attempting graceful shutdown for miniserve",
+		"msg", fmt.Sprintf("attempting graceful shutdown for %s", appName),
 	)
 }
 
-func (app *App) shutdown(ctx context.Context, s *http.Server, l kitlog.Logger) {
+func (app *App) shutdown(ctx context.Context, server *http.Server, logger kitlog.Logger) {
 	if app.NoOp() {
 		return
 	}
@@ -82,20 +92,24 @@ func (app *App) shutdown(ctx context.Context, s *http.Server, l kitlog.Logger) {
 	ctx, cancel := context.WithTimeout(ctx, shutdownTimeout*time.Second)
 	defer cancel()
 
-	if err := s.Shutdown(ctx); err != nil {
-		msg := fmt.Sprintf("miniserve failed to shut down cleanly: %v", err)
-		l.Log(
+	if err := server.Shutdown(ctx); err != nil {
+		msg := fmt.Sprintf("%s failed to shut down cleanly: %v", appName, err)
+		logger.Log(
 			"level", "error",
 			"msg", msg,
 		)
 
 		app.ExitValue = exitFailure
 
+		// Don't hang the terminal if the server fails to shutdown cleanly.
+		// Alternatively, I could simply call panic(err) here.
+		app.Trap <- syscall.SIGINT
+
 		return
 	}
 
-	l.Log(
+	logger.Log(
 		"level", "info",
-		"msg", "miniserve successfully shut down",
+		"msg", fmt.Sprintf("%s successfully shut down", appName),
 	)
 }

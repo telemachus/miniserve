@@ -9,7 +9,7 @@ const (
 	exitSuccess = 0
 	exitFailure = 1
 	appName     = "miniserve"
-	appVersion  = "v0.0.1"
+	appVersion  = "v0.0.2"
 	appUsage    = `usage: miniserve [-port PORT] [-d DIR]
 
 options:
@@ -24,9 +24,9 @@ func Run(args []string) int {
 	app := &App{ExitValue: exitSuccess}
 
 	app.ParseFlags(args)
-	l := app.NewLogger(os.Stderr)
-	s := app.NewServer(l)
-	app.StartAndShutdown(s, l)
+	logger := app.NewLogger(os.Stderr)
+	server := app.NewServer(logger)
+	app.StartAndShutdown(server, logger)
 
 	return app.ExitValue
 }

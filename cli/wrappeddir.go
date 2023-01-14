@@ -6,21 +6,22 @@ import (
 	"os"
 )
 
-// Code care of https://stackoverflow.com/a/57281956/26702.
+// Thanks to https://stackoverflow.com/a/57281956 for this idea and code.
 
-// wrappedDir wraps http.Dir so that we can wrap http.Dir's Open method.
-type wrappedDir struct {
-	d http.Dir
+// wrappedDir wraps http.Dir so that we can modify http.Dir's Open method.
+type WrappedDir struct {
+	dir http.Dir
 }
 
-// Open wraps http.Dir's Open method in order to handle URLs without ".html".
-func (d wrappedDir) Open(name string) (http.File, error) {
-	f, err := d.d.Open(name)
+// Open modifies http.Dir's Open method in order to handle URLs without ".html".
+func (wd WrappedDir) Open(name string) (http.File, error) {
+	fh, err := wd.dir.Open(name)
 	if errors.Is(err, os.ErrNotExist) {
-		if fPlus, errPlus := d.d.Open(name + ".html"); errPlus == nil {
-			return fPlus, nil
+		// errPlus == nil because I'm (unusually) looking for a successful open.
+		if fhPlus, errPlus := wd.dir.Open(name + ".html"); errPlus == nil {
+			return fhPlus, nil
 		}
 	}
 
-	return f, err
+	return fh, err
 }

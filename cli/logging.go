@@ -10,7 +10,8 @@ import (
 	kitlog "github.com/go-kit/log"
 )
 
-// Code from https://blog.questionable.services/article/guide-logging-middleware-go
+// Thanks to https://blog.questionable.services/article/guide-logging-middleware-go
+// for ideas and code.
 
 // responseWriter wraps http.ResponseWriter so that we can log key information.
 type responseWriter struct {
@@ -68,16 +69,16 @@ func loggingMiddleware(logger kitlog.Logger) func(http.Handler) http.Handler {
 	}
 }
 
+// NewLogger returns a configured go-kit logger.
 func (app *App) NewLogger(w io.Writer) kitlog.Logger {
 	if app.NoOp() {
 		return nil
 	}
 
-	var logger kitlog.Logger
-	logger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(w))
+	logger := kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(w))
 	stdlog.SetOutput(kitlog.NewStdlibAdapter(logger))
-	logger = kitlog.With(
-		logger, "ts", kitlog.DefaultTimestamp,
+	logger = kitlog.With(logger,
+		"ts", kitlog.DefaultTimestamp,
 	)
 
 	return logger
