@@ -22,11 +22,9 @@ options:
 // Run creates an App, performs the App's tasks, and returns an exit value.
 func Run(args []string) int {
 	app := &App{ExitValue: exitSuccess}
-
 	app.ParseFlags(args)
 	logger := app.NewLogger(os.Stderr)
 	server := app.NewServer(logger)
 	app.StartAndShutdown(server, logger)
-
 	return app.ExitValue
 }

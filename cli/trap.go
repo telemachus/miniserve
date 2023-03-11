@@ -12,7 +12,6 @@ import (
 func (app *App) TrapSignals(signals ...os.Signal) {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, signals...)
-
 	app.Trap = ch
 }
 
@@ -22,6 +21,5 @@ func (app *App) CloseTrap() {
 	if app.Trap == nil {
 		return
 	}
-
 	close(app.Trap)
 }

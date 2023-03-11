@@ -1,14 +1,16 @@
 package cli
 
 import (
+	"fmt"
 	"io"
-	stdlog "log"
 	"net/http"
 	"runtime/debug"
 	"time"
 
-	kitlog "github.com/go-kit/log"
+	"golang.org/x/exp/slog"
 )
+
+const logMsg = "miniserve"
 
 // Thanks to https://blog.questionable.services/article/guide-logging-middleware-go
 // for ideas and code.
@@ -32,54 +34,44 @@ func (rw *responseWriter) WriteHeader(code int) {
 	if rw.wroteHeader {
 		return
 	}
-
 	rw.status = code
 	rw.ResponseWriter.WriteHeader(code)
 	rw.wroteHeader = true
 }
 
-func loggingMiddleware(logger kitlog.Logger) func(http.Handler) http.Handler {
+func loggingMiddleware(logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
 				if err := recover(); err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					logger.Log(
-						"level", "err",
-						"msg", err,
-						"trace", debug.Stack(),
-					)
+					if err, ok := err.(error); ok {
+						w.WriteHeader(http.StatusInternalServerError)
+						msg := fmt.Sprintf("%s: %v", appName, err)
+						logger.Error(msg,
+							slog.Any("err", err),
+							"trace", debug.Stack(),
+						)
+					}
 				}
 			}()
-
 			start := time.Now()
 			wrapped := wrapResponseWriter(w)
 			next.ServeHTTP(wrapped, r)
-			logger.Log(
-				"level", "info",
-				"msg", "http logline",
+			logger.Info(logMsg,
 				"status", wrapped.status,
 				"method", r.Method,
 				"path", r.URL.EscapedPath(),
 				"duration", time.Since(start),
 			)
 		}
-
 		return http.HandlerFunc(fn)
 	}
 }
 
-// NewLogger returns a configured go-kit logger.
-func (app *App) NewLogger(w io.Writer) kitlog.Logger {
+// NewLogger returns a configured slog logger or nil.
+func (app *App) NewLogger(w io.Writer) *slog.Logger {
 	if app.NoOp() {
 		return nil
 	}
-
-	logger := kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(w))
-	stdlog.SetOutput(kitlog.NewStdlibAdapter(logger))
-	logger = kitlog.With(logger,
-		"ts", kitlog.DefaultTimestamp,
-	)
-
-	return logger
+	return slog.New(slog.NewTextHandler(w))
 }

@@ -1,7 +1,5 @@
 module github.com/telemachus/miniserve
 
-go 1.19
+go 1.20
 
-require github.com/go-kit/log v0.2.1
-
-require github.com/go-logfmt/logfmt v0.5.1 // indirect
+require golang.org/x/exp v0.0.0-20230310171629-522b1b587ee0
