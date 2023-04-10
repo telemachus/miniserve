@@ -22,6 +22,5 @@ func (wd WrappedDir) Open(name string) (http.File, error) {
 			return fhPlus, nil
 		}
 	}
-
 	return fh, err
 }
