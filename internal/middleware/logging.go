@@ -3,10 +3,9 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
-
-	"golang.org/x/exp/slog"
 )
 
 // Thanks to https://blog.questionable.services/article/guide-logging-middleware-go

@@ -9,7 +9,7 @@ const (
 	exitSuccess = 0
 	exitFailure = 1
 	appName     = "miniserve"
-	appVersion  = "v0.0.2"
+	appVersion  = "v0.1.0"
 	appUsage    = `usage: miniserve [-port PORT] [-d DIR]
 
 options:

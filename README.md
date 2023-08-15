@@ -8,7 +8,7 @@ computer.  It doesn't do much, but it has a few features I wanted.
 + URLs don't require `.html`.  For example, `miniserve` will look for
   `basedir/pretty-url` and, failing that, will try to serve
   `basedir/pretty-url.html`.
-+ Structured logging by default.
++ Structured logging via `log/slog`.
 + Graceful shutdown, as much as possible.
 + Optional flags can specify what port to serve on and what directory to
   serve.  (The defaults are 8080 and `"."`.)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"syscall"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/justinas/alice"
 	"github.com/telemachus/miniserve/internal/middleware"
-	"golang.org/x/exp/slog"
 )
 
 const (

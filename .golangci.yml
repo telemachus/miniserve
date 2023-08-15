@@ -1,4 +1,18 @@
 linters-settings:
+  depguard:
+    rules:
+      main:
+        files:
+          - $all
+        deny:
+          - pkg: reflect
+            desc: "avoid reflect"
+        test:
+          files:
+            - $all
+          deny:
+            - pkg: reflect
+              desc: "avoid reflect"
   errcheck:
     check-type-assertions: true
     check-blank: true
@@ -7,7 +21,7 @@ linters-settings:
       - fmt.Println
       - fmt.Fprintf
       - fmt.Fprintln
-      - (golang.org/x/exp/slog.Handler).Handle
+      - (log/slog.Handler).Handle
   goconst:
     min-len: 2
     min-occurrences: 3

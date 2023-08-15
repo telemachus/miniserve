@@ -3,12 +3,11 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"runtime"
 	"runtime/debug"
 	"time"
-
-	"golang.org/x/exp/slog"
 )
 
 func PanicRecovery(logger *slog.Logger, appName string) func(http.Handler) http.Handler {
