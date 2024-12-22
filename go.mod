@@ -1,6 +1,6 @@
 module github.com/telemachus/miniserve
 
-go 1.21
+go 1.23.4
 
 require (
 	github.com/justinas/alice v1.2.0

@@ -1,0 +1,23 @@
+ignoreGeneratedHeader = false
+severity = "warning"
+confidence = 0.8
+errorCode = 1
+warningCode = 0
+
+enableAllRules = true
+
+[rule.add-constant]
+  Disabled = true
+
+[rule.deep-exit]
+  Disabled = true
+
+[rule.flag-parameter]
+  Disabled = true
+
+[rule.line-length-limit]
+  Arguments = [110]
+
+[rule.unhandled-error]
+  Arguments = ["fmt.Printf", "fmt.Fprintf", "fmt.Println", "fmt.Fprintln"]
+

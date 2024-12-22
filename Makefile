@@ -4,11 +4,19 @@ fmt:
 	golangci-lint run --disable-all --no-config -Egofmt --fix
 	golangci-lint run --disable-all --no-config -Egofumpt --fix
 
-revive: fmt
-	revive -config $(HOME)/go/extras/revive.toml
-
-lint: revive
+lint: fmt
+	staticcheck ./...
+	revive -config revive.toml ./...
 	golangci-lint run
+
+golangci: fmt
+	golangci-lint run
+
+staticcheck: fmt
+	staticcheck ./...
+
+revive: fmt
+	revive -config revive.toml ./...
 
 build: lint
 	go build .
@@ -16,13 +24,8 @@ build: lint
 install: build
 	go install .
 
-test:
-	go test -shuffle on ./...
-
-testv:
-	go test -shuffle on -v ./...
-
 clean:
 	$(RM) miniserve
+	go clean -i -r -cache
 
-.PHONY: fmt lint build install test testv clean
+.PHONY: fmt lint build install clean

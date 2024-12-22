@@ -6,12 +6,12 @@ import (
 
 // App stores information about the application's state.
 type App struct {
-	ExitValue     int
 	Trap          chan os.Signal
-	HelpWanted    bool
-	VersionWanted bool
 	Port          string
 	Dir           string
+	ExitValue     int
+	HelpWanted    bool
+	VersionWanted bool
 }
 
 // NoOp determines whether an App should bail out.

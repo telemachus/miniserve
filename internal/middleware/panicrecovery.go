@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// PanicRecovery wraps an http.Handler with a middleware to handle panics more gracefully.
 func PanicRecovery(logger *slog.Logger, appName string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

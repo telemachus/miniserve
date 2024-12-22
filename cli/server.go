@@ -19,6 +19,7 @@ const (
 	shutdownTimeout     = 5
 )
 
+// NewServer returns an http.Server configured for use by miniserve.
 func (app *App) NewServer(logger *slog.Logger) *http.Server {
 	if app.NoOp() {
 		return nil
@@ -36,6 +37,7 @@ func (app *App) NewServer(logger *slog.Logger) *http.Server {
 	}
 }
 
+// StartAndShutdown starts and (gracefully) shuts down an http.Server.
 func (app *App) StartAndShutdown(server *http.Server, logger *slog.Logger) {
 	if app.NoOp() {
 		return

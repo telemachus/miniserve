@@ -22,10 +22,12 @@ func wrapResponseWriter(w http.ResponseWriter) *responseWriter {
 	return &responseWriter{ResponseWriter: w}
 }
 
+// Status returns an HTTP status code as an int.
 func (rw *responseWriter) Status() int {
 	return rw.status
 }
 
+// WriteHeader makes sure that a responseWriter writes a header only once.
 func (rw *responseWriter) WriteHeader(code int) {
 	if rw.wroteHeader {
 		return
@@ -35,6 +37,7 @@ func (rw *responseWriter) WriteHeader(code int) {
 	rw.wroteHeader = true
 }
 
+// Logging wraps an http.Handler with a logging middleware.
 func Logging(logger *slog.Logger, appName string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

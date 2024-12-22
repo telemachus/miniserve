@@ -1,12 +1,14 @@
 linters-settings:
+  copyloopvar:
+    check-alias: true
   depguard:
-    rules:
-      main:
-        files:
-          - $all
-        deny:
-          - pkg: reflect
-            desc: "avoid reflect"
+      rules:
+        main:
+          files:
+            - $all
+          deny:
+            - pkg: reflect
+              desc: "avoid reflect"
         test:
           files:
             - $all
@@ -21,25 +23,24 @@ linters-settings:
       - fmt.Println
       - fmt.Fprintf
       - fmt.Fprintln
-      - (log/slog.Handler).Handle
+  exhaustive:
+    default-signifies-exhaustive: true
   goconst:
     min-len: 2
     min-occurrences: 3
   gocritic:
+    disabled-checks:
+      - hugeParam
     enabled-tags:
       - diagnostic
       - experimental
       - opinionated
       - performance
       - style
-    disabled-checks:
-      - yodaStyleExpr
-      - unnamedResult
-  gosec:
-    excludes:
-      - G107
   govet:
-    check-shadowing: true
+    enable-all: true
+    shadow:
+      strict: true
   nolintlint:
     require-explanation: true
     require-specific: true
@@ -48,6 +49,8 @@ linters:
   disable-all: true
   enable:
     - bodyclose
+    - copyloopvar
+    - cyclop
     - depguard
     - dogsled
     - dupl
@@ -55,25 +58,22 @@ linters:
     - errchkjson
     - errname
     - errorlint
-    - exportloopref
     - exhaustive
     - goconst
     - gocritic
-    - gofumpt
-    - goimports
     - gosec
     - gosimple
     - govet
     - ineffassign
+    - ireturn
+    - maintidx
     - misspell
     - nolintlint
     - nakedret
     - prealloc
     - predeclared
-    - staticcheck
     - stylecheck
     - thelper
-    - tparallel
     - typecheck
     - unconvert
     - unparam
@@ -81,4 +81,12 @@ linters:
     - whitespace
 
 run:
+  concurrency: 8
   issues-exit-code: 1
+  timeout: 30m
+  tests: true
+  allow-parallel-runners: false
+
+issues:
+  exclude-dirs:
+    - internal

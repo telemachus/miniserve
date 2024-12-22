@@ -8,7 +8,7 @@ import (
 
 // Thanks to https://stackoverflow.com/a/57281956 for this idea and code.
 
-// wrappedDir wraps http.Dir so that we can modify http.Dir's Open method.
+// WrappedDir wraps http.Dir so that we can modify http.Dir's Open method.
 type WrappedDir struct {
 	dir http.Dir
 }
